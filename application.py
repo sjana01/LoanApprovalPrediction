@@ -16,10 +16,10 @@ app = application
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('home.html')
 
-@app.route('/predictddata', methods=['GET', 'POST'])
-def predict_datapoint():
+@app.route('/predict', methods=['GET', 'POST'])
+def predict():
     if request.method == 'GET':
         return render_template('home.html')
     else:
@@ -41,15 +41,17 @@ def predict_datapoint():
 
         pr = PredictPipeline()
         results = pr.predict(pred_df)
+        print(results)
         decision = ''
         if results[0] == 0:
             decision = 'Not Approved'
         else:
             decision = 'Approved'
-        print(results)
-        return render_template('home.html', decision = decision)
+        
+        prediction_text = 'Your Loan Approval Status is: {}'.format(decision)
+        return render_template('home.html', prediction_text = prediction_text)
     
 
 if __name__=="__main__":
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0")
 
