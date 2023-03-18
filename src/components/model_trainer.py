@@ -9,9 +9,11 @@ from sklearn.svm import LinearSVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
+
 
 from src.components.data_ingestion import DataIngestion, DataIngestionConfig
 from src.components.data_transformation import DataTransformation, DataTransformationConfig
@@ -44,9 +46,49 @@ class ModelTrainer:
                       "CatBoost Classifier" : CatBoostClassifier(verbose=False)
                       }
             
+            params={
+                "Logistic Regression": {},
+                "Support Vector Machine": {
+                    'C': [0.5, 1.0, 5, 10], 
+                    # 'penalty': ['l1','l2']
+                },
+                "K-Neighbors Classifier": {
+                    'metric': ['euclidean', 'manhattan'],
+                    'n_neighbors': [2,3,5,7,10]
+                },
+                "Decision Tree Classifier": {
+                    'criterion':['gini', 'entropy'],
+                    'max_depth': [2,3,5,10],
+                    # 'max_features':['sqrt','log2'],
+                },
+                "Gradient Boosting Classifier":{
+                    # 'loss':['squared_error', 'huber', 'absolute_error', 'quantile'],
+                    'learning_rate':[.1,.01,.05,.001],
+                    'subsample':[0.6,0.7,0.75,0.8,0.85,0.9],
+                    # 'criterion':['squared_error', 'friedman_mse'],
+                    # 'max_features':['auto','sqrt','log2'],
+                    'n_estimators': [8,16,32,64,128,256]
+                },
+                "Random Forest Classifier":{
+                    # 'criterion':['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
+                 
+                    # 'max_features':['sqrt','log2',None],
+                    'n_estimators': [8,16,32,64,128,256]
+                },
+                "XGBoost Classifier":{
+                    'learning_rate':[.1,.01,.05,.001],
+                    'n_estimators': [8,16,32,64,128,256]
+                },
+                "CatBoost Classifier":{
+                    'depth': [6,8,10],
+                    'learning_rate': [0.01, 0.05, 0.1],
+                    'iterations': [30, 50, 100]
+                } 
+            }
+
             model_report:dict = evaluate_model(X_train=X_train, y_train=y_train, 
                                                X_test=X_test, y_test=y_test,
-                                               models=models)
+                                               models=models, params=params)
             
             # Get the best test score from the dict
             best_model_score = max(sorted(model_report.values()))
